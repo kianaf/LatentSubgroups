@@ -27,11 +27,11 @@ function density_plot(x1, x2, title)
 end
 
 ################## 2-layer one-dimension histogram from original and synthetic data ##################
-function histogram_plot(x1, x2, title)
+function histogram_plot(x1, x2, title, y_lim)
 
     df = DataFrame(data = vcat(x1, x2), type = vcat(fill("synthetic", length(x2)), fill("original", length(x1))))
 
-    @df df groupedhist(:data, group = :type, bar_position = :dodge)
+    @df df groupedhist(:data, group = :type, bar_position = :dodge, ylim= y_lim)
     # Plots.histogram(x1, label = "original", fillalpha = 0.3, bins = 2, bar_width = 1, xlim = (-1,2))
     # Plots.histogram!(x2, label = "synthetic", title = title, fillalpha = 0.3, bins = 2, bar_width = 0.5, xlim = (-1,2))
 end
@@ -40,7 +40,7 @@ end
 
 ################## x-layer one-dimension histogram from original and synthetic data of different methods ##################
 
-function histogram_plot(title, data_arrays::Array, labels::Array, color_array::Array)
+function histogram_plot(title, data_arrays::Array, labels::Array, color_array::Array, y_lim::Tuple)
     # Check if the number of data arrays matches the number of labels
     if length(data_arrays) != length(labels)
         error("The number of data arrays must match the number of labels.")
@@ -71,7 +71,7 @@ function histogram_plot(title, data_arrays::Array, labels::Array, color_array::A
     levels!(df.type, desired_order)
 
     # Plot the grouped histogram
-    @df df groupedhist(:data, group = :type, color = color_array, bar_position = :dodge, title = title, bar_width = 0.5, xticks = [0,1], size = (200, 300))
+    @df df groupedhist(:data, group = :type, color = color_array, bar_position = :dodge, title = title, bar_width = 0.5, xticks = [0,1], size = (200, 300), ylim = y_lim)
 
 end
 ################## optimization loss plot ##################

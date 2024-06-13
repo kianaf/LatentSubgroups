@@ -67,7 +67,7 @@ end
 
     synthetic_data::Bool = false                                                                                     # if true, we generate synthetic data and if false we are interested in latent structure (2 dimensional)
     
-    IPW_sampling::Bool = true                                                                                        # if true, we use IPW sampling for training VAE
+    IPW_sampling::Bool = true                                                                                        # if true, we use IPW sampling for VAE
     subpopulation_mode::Int = 2                                                                                         # 0 which is class 0 and 1 which is class 1 and 2 which is both individuals common to both                                                           
     grid_point_size::Float32 = 0.2
     δ::Float32 = 0.1                                                                                                     
