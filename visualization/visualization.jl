@@ -6,6 +6,8 @@ using ImageFiltering
 using KernelDensity
 using DataFrames
 using Statistics:cor
+# Set default DPI to 300
+default(dpi=300)
 #######################################Visualization############################################
 
 ################## scatteplot for every two variables ##################
@@ -40,7 +42,7 @@ end
 
 ################## x-layer one-dimension histogram from original and synthetic data of different methods ##################
 
-function histogram_plot(title, data_arrays::Array, labels::Array, color_array::Array, y_lim::Tuple)
+function histogram_plot(title, data_arrays::Array, labels::Array, color_array::Array, y_lim::Tuple, yformatter_flag =true)
     # Check if the number of data arrays matches the number of labels
     if length(data_arrays) != length(labels)
         error("The number of data arrays must match the number of labels.")
@@ -71,8 +73,11 @@ function histogram_plot(title, data_arrays::Array, labels::Array, color_array::A
     levels!(df.type, desired_order)
 
     # Plot the grouped histogram
-    @df df groupedhist(:data, group = :type, color = color_array, bar_position = :dodge, title = title, bar_width = 0.5, xticks = [0,1], size = (200, 300), ylim = y_lim)
-
+    if yformatter_flag
+        @df df groupedhist(:data, group = :type, color = color_array, bar_position = :dodge, title = title, bar_width = 0.5, xticks = [0,1], size = (200, 300), ylim = y_lim)
+    else
+        @df df groupedhist(:data, group = :type, color = color_array, bar_position = :dodge, title = title, bar_width = 0.5, xticks = [0,1], size = (200, 300), ylim = y_lim, yformatter=_->"")
+    end
 end
 ################## optimization loss plot ##################
 function loss_plot(loss_array)
@@ -314,9 +319,9 @@ end
 
 function scatter_latent(z, colorcode_str, colorcode, title)
 
-    Plots.scatter(z[1,colorcode.==0],z[2,colorcode.==0], markershape = :circle, markersize = 5,markerstrokewidth=0.5,color = colorant"#1D4A91" , markerstrokecolor = :white, label = "$(colorcode_str) = 0", alpha = 0.6 )
+    Plots.scatter(z[1,colorcode.==0],z[2,colorcode.==0], markershape = :circle, markersize = 3,markerstrokewidth=0.5,color = colorant"#1D4A91" , markerstrokecolor = :white, label = "$(colorcode_str) = 0", alpha = 0.6 )
     Plots.scatter!([0],[0], markershape = :circle, markersize = 1,markerstrokewidth=0,color = :white , label = " " )
-    plt = Plots.scatter!(z[1,colorcode.==1],z[2,colorcode.==1], markershape = :dtriangle, markersize = 5, markerstrokewidth=0.5, color = colorant"#AE232F", markerstrokecolor = :white,label = "$(colorcode_str) = 1", title = title  )
+    plt = Plots.scatter!(z[1,colorcode.==1],z[2,colorcode.==1], markershape = :dtriangle, markersize = 4, markerstrokewidth=0.5, color = colorant"#AE232F", markerstrokecolor = :white,label = "$(colorcode_str) = 1", title = title, dpi = 300  )
     
 end
 
@@ -337,10 +342,10 @@ function scatter_latent_ist(z, colorcode)
 
 
     if size(z,1) >2
-        Plots.scatter(z[1,:],z[2,:],z[3,:], group = colorcode , markercolor = clr[map(x->color_dict[x], colorcode)], alpha = 0.9, markerstrokewidth=0, legend = true)
+        Plots.scatter(z[1,:],z[2,:],z[3,:], group = colorcode , markercolor = clr[map(x->color_dict[x], colorcode)], alpha = 0.9, markerstrokewidth=0, legend = true, dpi = 300)
     else
 
-        Plots.scatter(z[1,:],z[2,:], group = colorcode ,markercolor = clr[map(x->color_dict[x], colorcode)], alpha = 0.9, markerstrokewidth=0, legend = true)
+        Plots.scatter(z[1,:],z[2,:], group = colorcode ,markercolor = clr[map(x->color_dict[x], colorcode)], alpha = 0.9, markerstrokewidth=0, legend = true, dpi = 300)
     end
 end
 
@@ -394,8 +399,8 @@ function scatter_latent_glm(z, E, y, probabilities, sample_size)
 
     z_sample, E_sample, y_sample, probabilities_sample = get_sample_for_plotting(sample_size, z, probabilities, E, y)
 
-    Plots.scatter(z_sample[1,E_sample.==0],z_sample[2,E_sample.==0], markershape = :dtriangle, markersize = 8,markerstrokewidth= 0, c = get_color.(probabilities_sample[E_sample.==0]) , label = "E = 0" )
-    plt = Plots.scatter!(z_sample[1,E_sample.==1],z_sample[2,E_sample.==1], markershape = :circle, markersize = 8, markerstrokewidth= 0, c = get_color.(probabilities_sample[E_sample.==1]), label = "E = 1" )
+    Plots.scatter(z_sample[1,E_sample.==0],z_sample[2,E_sample.==0], markershape = :dtriangle, markersize = 4,markerstrokewidth= 0, c = get_color.(probabilities_sample[E_sample.==0]) , label = "E = 0" )
+    plt = Plots.scatter!(z_sample[1,E_sample.==1],z_sample[2,E_sample.==1], markershape = :circle, markersize = 3, markerstrokewidth= 0, c = get_color.(probabilities_sample[E_sample.==1]), label = "E = 1" )
     display(plt)
 end
 
@@ -493,13 +498,14 @@ function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, le
 
     Plots.heatmap(X, Y, colormat, color = cs, alpha=0.3, clim = (0,1))
 
-    Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
+    Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,markershape = :circle, msc = :white, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, markershape = :dtriangle, markersize = 3,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(X) - grid_point_size, maximum(X)+ grid_point_size), ylims = (minimum(Y) - grid_point_size, maximum(Y)+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+    plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
 
 
-    display(plt2)
+    
 
+    return plt2
 end
 
 
@@ -517,8 +523,10 @@ function latent_propensity_ovrlay_no_outcome(z, probabilities, sample_size, E, y
     Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
     Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 3,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(X) - grid_point_size, maximum(X)+ grid_point_size), ylims = (minimum(Y) - grid_point_size, maximum(Y)+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
-    display(plt2)
+    plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+    
+
+    return plt2
 end
 
 
@@ -536,9 +544,9 @@ function latent_propensity_ovrlay_region(z, probabilities, sample_size, REGION, 
     blur = imfilter(colormat, Kernel.gaussian(0.5))
 
     Plots.heatmap(X, Y, colormat, color = cs, alpha=0.3, clim = (0,1))
-    Plots.scatter!(z_sample[1,(REGION_sample.==0)],z_sample[2,(REGION_sample.==0)],  markerstrokewidth = 0,markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "REGION = EU-EAST")
+    Plots.scatter!(z_sample[1,(REGION_sample.==0)],z_sample[2,(REGION_sample.==0)],  markerstrokewidth = 0, msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "REGION = EU-EAST")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt_propensity_score = Plots.scatter!(z_sample[1,(REGION_sample.==1)],z_sample[2,(REGION_sample.==1)], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label =  "REGION = EU-NORTH",  xlims = (minimum(X) - grid_point_size, maximum(X)+ grid_point_size), ylims = (minimum(Y) - grid_point_size, maximum(Y)+ grid_point_size),  fontsize = 8, legendfontsize=6, font= "Helvetica", title = string("A) Latent representation and propensity score"))
+    plt_propensity_score = Plots.scatter!(z_sample[1,(REGION_sample.==1)],z_sample[2,(REGION_sample.==1)],msc = :white, markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label =  "REGION = EU-NORTH",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=6, font= "Helvetica", title = string("A) Latent representation and propensity score"))
     
     
     colormat_IPW = normalize_IPW(compute_IPW.(propensity_score_average)) .* length(probabilities)
@@ -550,9 +558,9 @@ function latent_propensity_ovrlay_region(z, probabilities, sample_size, REGION, 
 
 
     Plots.heatmap(X, Y, colormat_IPW', color = cs, alpha=0.3)
-    Plots.scatter!(z_sample[1,(REGION_sample.==0)],z_sample[2,(REGION_sample.==0)],  markerstrokewidth = 0,markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "REGION = EU-EAST")
+    Plots.scatter!(z_sample[1,(REGION_sample.==0)],z_sample[2,(REGION_sample.==0)],  markerstrokewidth = 0, msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "REGION = EU-EAST")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt_weights = Plots.scatter!(z_sample[1,(REGION_sample.==1)],z_sample[2,(REGION_sample.==1)], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label =  "REGION = EU-NORTH",  xlims = (minimum(X),maximum(X)), ylims = (minimum(X),maximum(X)), fontsize = 8, legendfontsize=6, font= "Helvetica", title = string("B) Latent representation and sampling weights"))
+    plt_weights = Plots.scatter!(z_sample[1,(REGION_sample.==1)],z_sample[2,(REGION_sample.==1)], markerstrokewidth = 0, msc = :white, markershape = :circle, markersize = 3, color = colorant"#AE232F", label =  "REGION = EU-NORTH",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size), fontsize = 8, legendfontsize=6, font= "Helvetica", title = string("B) Latent representation and sampling weights"))
     
 
     return plt_propensity_score, plt_weights
@@ -683,4 +691,16 @@ function create_weighted_sampling_plots(args, weighted_samples_Bernouli, normali
 
     return hist_second_dim, smoothed_propensity_score, sampled_new_scatterplot, layered_latent_sampling_plot
 
+end
+
+
+function rectangle_from_coords(xb, yb, xt, yt)
+    [
+        xb  yb
+        xt  yb
+        xt  yt
+        xb  yt
+        xb  yb
+        NaN NaN
+    ]
 end

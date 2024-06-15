@@ -219,9 +219,10 @@ function save_vae_results(training_data::DataLoader, preprocessed_data, original
         REGION = (load_region(args.data_string).=="EU-NORTH")
 
 
+        size(700,500)
         plt_propensity_score, plt_weights_latent = latent_propensity_ovrlay_region(z, probabilities_death_region, 2000 , REGION, "Region", args.grid_point_size)
 
-        plt_merged = Plots.plot(plt_propensity_score, plt_weights_latent, layout = (1,2), size = (1200, 500), titlefontsize = 8)
+        plt_merged = Plots.plot(plt_propensity_score, plt_weights_latent, layout = (1,2), size = (1400, 500), fontsize = 8)
         Plots.savefig(plt_merged, string(vae_dir, "/prior_sampling/IPW_sampling/propensity_ist_fig.pdf"))
         Plots.savefig(plt_merged, string(vae_dir, "/prior_sampling/IPW_sampling/propensity_ist_fig.png"))
 
@@ -356,7 +357,7 @@ function marginal_density_plots(original_data, synthetic_data, path, dataTypeArr
             plt = density_plot(original_data[:, i], synthetic_data[:, i], "dimension $(i)")
             Plots.savefig(string(path, "/pdf_diagrams/dimension_$(i).pdf"))
         else
-            plt = histogram_plot(original_data[:, i], synthetic_data[:, i], "dimension $(i)")
+            plt = histogram_plot(original_data[:, i], synthetic_data[:, i], "dimension $(i)", (0, length(original_data[:, i])))
             Plots.savefig(string(path, "/pdf_diagrams/dimension_$(i).pdf"))
         end
     end

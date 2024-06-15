@@ -36,7 +36,7 @@ end
 #FIXME where to put learning rate and the others? it is VAE related but some are data related the reason I did not seperate is that some are being used as inputs one solution can be hyperparameters and data structs
 @with_kw mutable struct Args
 
-    data_string::String = "ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" #"ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" # "data_scenario1" # "ist_randomization_data_smaller_no_west_no_south_aug5"
+    data_string::String =  "ist_randomization_data_smaller_no_west_no_south_aug5" #"data_scenario1"#"sim" #"ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" # "data_scenario1" # "ist_randomization_data_smaller_no_west_no_south_aug5"
     #"ist_randomization_data_smaller_POLA_SWED_aug15"   ##"ist_randomization_data_smaller_no_west_no_south_no_treatment_aug8"#"ist_randomization_data_smaller_aug3" #"ist_randomization_data_aug3"# "ist_new" #"ist_more_features_no_west"#"ist_randomization_data_july14"  # "ist2d_subset" #  "ist_more_features_2"#"ist_more_features_2" #"ist_more_features"  #"data_scenario1"#"hnscc_my_version" #"sc_dec_19"                                                   # specify the dataset you want to use "toy", "sim" or "ist" (in case of having your own csv file use the name before .csv) 
     η::Float32 = 1e-4                                                                                                # learning rate for training VAE
     λ::Float32 = 0.01f0
@@ -60,14 +60,14 @@ end
     bimodality_score_threshold::Float32 = 0                                                                          # When zero, bimodality_flag becomes always true.
     
     scaling::Bool = true                                                                                              # true when scaling is requested
-    scaling_method::String = "scaling" # or "standardization"  # or "scaling"
+    scaling_method::String = "standardization" # or "standardization"  # or "scaling"
                                                                                     
     AIQN::Bool = false                                                                                               # true if autoregressive implicit quantile networks method is used for training VAE
     multimodal_encoder::Bool = true                                                                                 # true if we train different encoders for different modalities in the VAE                                                                                           
 
     synthetic_data::Bool = false                                                                                     # if true, we generate synthetic data and if false we are interested in latent structure (2 dimensional)
     
-    IPW_sampling::Bool = true                                                                                        # if true, we use IPW sampling for VAE
+    IPW_sampling::Bool = false                                                                                        # if true, we use IPW sampling for VAE
     subpopulation_mode::Int = 2                                                                                         # 0 which is class 0 and 1 which is class 1 and 2 which is both individuals common to both                                                           
     grid_point_size::Float32 = 0.2
     δ::Float32 = 0.1                                                                                                     

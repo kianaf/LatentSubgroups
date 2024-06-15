@@ -300,6 +300,7 @@ function fit_logistic_regression_death(preprocessed_data, args)
     df = DataFrame(preprocessed_data, :auto)
 
     colnames = names(CSV.read("./data/$(args.data_string).csv" , DataFrame)[:, 1:end-3])
+
     rename!(df, colnames)
     # @show CSV.read("./data/$(args.data_string).csv" , DataFrame)[:, end]
     FDEAD = DataFrame(FDEAD = CSV.read("./data/$(args.data_string).csv" , DataFrame)[:, end-2])
