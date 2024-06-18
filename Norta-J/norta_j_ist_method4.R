@@ -108,7 +108,7 @@ colnames(x_simulation)<-list_x
 
 
 stats <- Return.key.IPD.summaries(Return.IPD.design.matrix(x_simulation), 
-                                  corrtype = "moment.corr")
+                                  corrtype = "rank.corr")
 
 
 set.seed( 65553, "L'Ecuyer")
@@ -120,7 +120,7 @@ system.time(
     correlation.matrix =  stats$correlation.matrix,
     moments = stats$first.four.moments,
     x.mode = stats$is.binary.variable,
-    corrtype = "moment.corr",
+    corrtype = "rank.corr",
     marg.model = "johnson", #"gamma",  # or johnson
     variable.names = stats$variable.names, 
     checkdata = TRUE,
