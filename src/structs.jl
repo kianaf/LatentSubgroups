@@ -12,6 +12,10 @@ using Revise
 
     input_dim::Int = 9                                   # number of features
 
+    pre_transformation_type::String = "power"            # "power" vs "quantile"
+    qt_array::Array{QuantileTransformer} = []               # the array of quantiles per inout dimensions
+    n_quantiles::Int = 1000
+
     λ2::Array{Float32} = fill(0.0, input_dim)             # shifting value for box cox transformation
     λ1::Array{Float32} = fill(1.0, input_dim)             # power value for box cox transformation
     box_cox_epochs::Int = 5000                           # number of epochs for training box cox transformation parameters
@@ -36,7 +40,7 @@ end
 #FIXME where to put learning rate and the others? it is VAE related but some are data related the reason I did not seperate is that some are being used as inputs one solution can be hyperparameters and data structs
 @with_kw mutable struct Args
 
-    data_string::String =  "ist_randomization_data_smaller_no_west_no_south_aug5" #"data_scenario1"#"sim" #"ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" # "data_scenario1" # "ist_randomization_data_smaller_no_west_no_south_aug5"
+    data_string::String =  "sim"#"ist_randomization_data_smaller_no_west_no_south_aug5" #"data_scenario1"#"sim" #"ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" # "data_scenario1" # "ist_randomization_data_smaller_no_west_no_south_aug5"
     #"ist_randomization_data_smaller_POLA_SWED_aug15"   ##"ist_randomization_data_smaller_no_west_no_south_no_treatment_aug8"#"ist_randomization_data_smaller_aug3" #"ist_randomization_data_aug3"# "ist_new" #"ist_more_features_no_west"#"ist_randomization_data_july14"  # "ist2d_subset" #  "ist_more_features_2"#"ist_more_features_2" #"ist_more_features"  #"data_scenario1"#"hnscc_my_version" #"sc_dec_19"                                                   # specify the dataset you want to use "toy", "sim" or "ist" (in case of having your own csv file use the name before .csv) 
     η::Float32 = 1e-4                                                                                                # learning rate for training VAE
     λ::Float32 = 0.01f0

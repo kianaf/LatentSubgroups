@@ -6,7 +6,6 @@ gr()
 
 
 includet("structs.jl")
-includet("../visualization/plotting_paper.jl")
 includet("../visualization/visualization.jl")
 
 

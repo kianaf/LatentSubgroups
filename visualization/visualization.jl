@@ -234,6 +234,7 @@ function pairwise_correlation(x)
         0.2   1.0   0.4
         1.0   0.4   0.3
     """
+
     return Plots.heatmap(cor(x), clim = (-1,1))
 end
 
@@ -245,6 +246,11 @@ function pairwise_correlation_diff(x::Matrix, synthetic_data::Matrix)
 end
 
 function pairwise_correlation_diff(x::DataFrame, synthetic_data::DataFrame)
+    cs = cgrad([:white, palette(:Reds)[8],  palette(:Reds)[end]])
+    return Plots.heatmap(abs.(cor(Matrix(x)) .- cor(Matrix(synthetic_data))), clim = (0, 1), color = cs)
+end
+
+function pairwise_correlation_diff(x, synthetic_data)
     cs = cgrad([:white, palette(:Reds)[8],  palette(:Reds)[end]])
     return Plots.heatmap(abs.(cor(Matrix(x)) .- cor(Matrix(synthetic_data))), clim = (0, 1), color = cs)
 end

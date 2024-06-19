@@ -24,6 +24,8 @@ using BSON
 using Plots
 using LaTeXStrings
 
+includet("quantile_transformation.jl")
+
 # KernelDensity
 # https://github.com/JuliaStats/KernelDensity.jl
 
@@ -634,23 +636,40 @@ function preprocess!(args::Args, preprocess_ps::preprocess_params, x, dataTypeAr
 
     if args.pre_transformation && sum(dataTypeArray) > 0
 
-        Random.seed!(args.seed)
+        if preprocess_ps.pre_transformation_type == "power"
+            Random.seed!(args.seed)
 
-        ####################### ‌Box-Cox transformation ###########################
+            ####################### ‌Box-Cox transformation ###########################
 
-        preprocess_ps.λ2 = set_alpha!(preprocess_ps.λ2, x, dataTypeArray)
-    
-        preprocess_ps.λ1, loss_array_λ1= set_lambda!(preprocess_ps, x, dataTypeArray, args)
+            preprocess_ps.λ2 = set_alpha!(preprocess_ps.λ2, x, dataTypeArray)
+        
+            preprocess_ps.λ1, loss_array_λ1= set_lambda!(preprocess_ps, x, dataTypeArray, args)
 
-        x_tr_BC = BC_transform_all_dimensions(x, preprocess_ps.λ2, preprocess_ps.λ1, dataTypeArray)
+            x_tr_BC = BC_transform_all_dimensions(x, preprocess_ps.λ2, preprocess_ps.λ1, dataTypeArray)
 
-        ####################### Power transformation #############################
+            ####################### Power transformation #############################
 
-        preprocess_ps, loss_array_power, anim_list = set_power_parameter_new!(x_tr_BC, x, preprocess_ps, dataTypeArray, args)
+            preprocess_ps, loss_array_power, anim_list = set_power_parameter_new!(x_tr_BC, x, preprocess_ps, dataTypeArray, args)
 
-        x_tr_power = power_tr_all_dimensions(x_tr_BC, preprocess_ps.shift, preprocess_ps.peak_rng, preprocess_ps.power, dataTypeArray, preprocess_ps.peak2 .!= preprocess_ps.peak1 )
+            x_tr_power = power_tr_all_dimensions(x_tr_BC, preprocess_ps.shift, preprocess_ps.peak_rng, preprocess_ps.power, dataTypeArray, preprocess_ps.peak2 .!= preprocess_ps.peak1 )
 
-        data = x_tr_power
+            data = x_tr_power
+        elseif preprocess_ps.pre_transformation_type == "quantile"
+            data = fill(0.0, size(x,1), size(x,2))
+            
+            for col = 1:size(x, 2)
+                if dataTypeArray[col]
+                    qt = fit_quantile_transformer(x[:, col]; preprocess_ps.n_quantiles)  # Fit the transformer
+                    data[:, col] = quantile_transform(qt, x[:, col])  # Transform the data to follow a normal distribution
+                    push!(preprocess_ps.qt_array, qt)
+                else
+                    data[:, col] = x[:, col]
+                    empty_qt = QuantileTransformer([], 1000)
+                    push!(preprocess_ps.qt_array, empty_qt)
+                end
+            end
+
+        end
 
     else
         if sum(dataTypeArray) == 0
@@ -682,7 +701,11 @@ function preprocess!(args::Args, preprocess_ps::preprocess_params, x, dataTypeAr
     end
     
     if args.pre_transformation && sum(dataTypeArray) > 0
-        save_preprocess_results(data', x_tr_BC, x_tr_power, loss_array_power, loss_array_λ1, args.scaling, preprocess_ps, dataTypeArray, anim_list)
+        if preprocess_ps.pre_transformation_type == "power"
+            save_preprocess_results(data', x_tr_BC, x_tr_power, loss_array_power, loss_array_λ1, args.scaling, preprocess_ps, dataTypeArray, anim_list)
+        else
+            save_preprocess_results(data', preprocess_ps, dataTypeArray)
+        end
     elseif args.scaling
         save_preprocess_results(data', preprocess_ps, dataTypeArray)
     end

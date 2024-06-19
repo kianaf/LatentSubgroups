@@ -572,15 +572,26 @@ function VAE_output(input, m::vanilla_vae, args::Args, preprocess_ps::preprocess
     end
 
     
-
+   
 
     if args.pre_transformation
 
-        output = output'
+        if preprocess_ps.pre_transformation_type == "power"
 
-        output = reverse_power(preprocess_ps, output, dataTypeArray)
-       
-        output = reverse_BC(preprocess_ps, output, dataTypeArray)
+            output = output'
+
+            output = reverse_power(preprocess_ps, output, dataTypeArray)
+        
+            output = reverse_BC(preprocess_ps, output, dataTypeArray)
+        
+        else
+            output = output'
+
+            
+            output = inverse_quantile_transform(preprocess_ps.qt_array, output, dataTypeArray)  # Inverse transform the data
+
+
+        end
 
         return output, glm_model_death_region 
     else
@@ -707,15 +718,24 @@ function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preproc
     
     if args.pre_transformation
 
-        output = output'
+        if preprocess_ps.pre_transformation_type == "power"
 
-        output = reverse_power(preprocess_ps, output, dataTypeArray)
+            output = output'
+
+            output = reverse_power(preprocess_ps, output, dataTypeArray)
 
 
-       
+            output = reverse_BC(preprocess_ps, output, dataTypeArray)
+
+        else
+
+            output = output'
+
+            
+            output = inverse_quantile_transform(preprocess_ps.qt_array, output, dataTypeArray)  # Inverse transform the data
 
 
-        output = reverse_BC(preprocess_ps, output, dataTypeArray)
+        end
 
         
         return output, glm_model_death_region 

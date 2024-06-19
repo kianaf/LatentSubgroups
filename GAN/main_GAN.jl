@@ -13,7 +13,6 @@ using Revise
 includet("src/structs.jl")
 includet("GAN/GAN.jl")
 includet("src/transformations.jl")
-includet("src/visualization/plotting_paper.jl")
 includet("src/visualization/visualization.jl")
 includet("src/load_data.jl")
 includet("src/report.jl")
