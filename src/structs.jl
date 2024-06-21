@@ -13,8 +13,8 @@ using Revise
     input_dim::Int = 9                                   # number of features
 
     pre_transformation_type::String = "power"            # "power" vs "quantile"
-    qt_array::Array{QuantileTransformer} = []               # the array of quantiles per inout dimensions
-    n_quantiles::Int = 1000
+    qt_array::Array{QuantileTransformer} = []               # the array of quantiles per input dimensions
+    n_quantiles::Int = 50
 
     λ2::Array{Float32} = fill(0.0, input_dim)             # shifting value for box cox transformation
     λ1::Array{Float32} = fill(1.0, input_dim)             # power value for box cox transformation
@@ -40,13 +40,15 @@ end
 #FIXME where to put learning rate and the others? it is VAE related but some are data related the reason I did not seperate is that some are being used as inputs one solution can be hyperparameters and data structs
 @with_kw mutable struct Args
 
-    data_string::String =  "sim"#"ist_randomization_data_smaller_no_west_no_south_aug5" #"data_scenario1"#"sim" #"ist_randomization_data_smaller_no_west_no_south_aug5" #"sim" # "data_scenario1" # "ist_randomization_data_smaller_no_west_no_south_aug5"
+    # data_string::String = "ist_randomization_data_smaller_no_west_no_south_aug5" 
+    # data_string::String = "sim"
+    data_string::String = "data_scenario1"
     #"ist_randomization_data_smaller_POLA_SWED_aug15"   ##"ist_randomization_data_smaller_no_west_no_south_no_treatment_aug8"#"ist_randomization_data_smaller_aug3" #"ist_randomization_data_aug3"# "ist_new" #"ist_more_features_no_west"#"ist_randomization_data_july14"  # "ist2d_subset" #  "ist_more_features_2"#"ist_more_features_2" #"ist_more_features"  #"data_scenario1"#"hnscc_my_version" #"sc_dec_19"                                                   # specify the dataset you want to use "toy", "sim" or "ist" (in case of having your own csv file use the name before .csv) 
     η::Float32 = 1e-4                                                                                                # learning rate for training VAE
     λ::Float32 = 0.01f0
     β::Float64 = 0.5                                                                                            # regularization paramater
     batch_size::Int = 128                                                                                             # batch size
-    epochs::Int = 500                                                                                                 # number of epochs for training VAE
+    epochs::Int = 1000                                                                                                 # number of epochs for training VAE
     seed::Int = 42                                                                                                   # random seed
     input_dim::Int = 9                                                                                               # number of features
     latent_dim::Int = 2                                                                                               # latent dimension
@@ -71,7 +73,7 @@ end
 
     synthetic_data::Bool = false                                                                                     # if true, we generate synthetic data and if false we are interested in latent structure (2 dimensional)
     
-    IPW_sampling::Bool = false                                                                                        # if true, we use IPW sampling for VAE
+    IPW_sampling::Bool = true                                                                                        # if true, we use IPW sampling for VAE
     subpopulation_mode::Int = 2                                                                                         # 0 which is class 0 and 1 which is class 1 and 2 which is both individuals common to both                                                           
     grid_point_size::Float32 = 0.2
     δ::Float32 = 0.1                                                                                                     

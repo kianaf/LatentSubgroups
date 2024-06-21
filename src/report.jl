@@ -100,6 +100,12 @@ function save_preprocess_results(x_st::Matrix, preprocess_ps::preprocess_params,
     pre_transformation_dir = string(args.current_run_path, "/pre_transformation")
     mkdir(pre_transformation_dir)
 
+    # save preprocess_params as a txt file
+    open(string(pre_transformation_dir,"/preprocess_params.txt"), "a") do file
+        print(file, preprocess_ps)
+    end
+
+
     ###### scaling results ######
     mkdir(string(pre_transformation_dir, "/scaling"))
     writedlm(string(pre_transformation_dir, "/scaling/scaled_data.csv"),  x_st, ',')
