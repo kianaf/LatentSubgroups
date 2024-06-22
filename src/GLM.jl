@@ -85,8 +85,22 @@ function fit_logistic_regression_outcome(preprocessed_data, x6_inclusion)
 
     selected_features = features[(coeftable(model).cols[4].< 0.05)[2:end]]
 
+    formula_str = "Exposure ~ "
 
-    return Set(selected_features)
+    for feature in selected_features
+        if feature == features[1]
+            formula_str = string(formula_str, feature)
+        else
+            formula_str = string(formula_str, "+", feature)
+        end
+    end
+    
+
+    fm = @eval(@formula($(Meta.parse(formula_str))))
+    selected_model = glm(fm, df, Binomial(), LogitLink())
+
+
+    return selected_model, Set(selected_features)
 end
 
 function fit_logistic_regression_selected_features_both(preprocessed_data, selected_features_e, selected_features_y, x6_inclusion)

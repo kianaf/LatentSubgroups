@@ -492,22 +492,38 @@ end
 
 
 
-function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, legend_flag, grid_point_size)
+function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, legend_flag, grid_point_size, lables = "E")
 
     z_sample, E_sample, y_sample, probabilities_sample = get_sample_for_plotting(sample_size, z, probabilities, E, y)
 
     colorcode_str = "E"
 
     cs = cgrad([colorant"#1D4A91", colorant"white",  colorant"#AE232F"])
+    # cs = cgrad(:seismic)
     X, Y, colormat, propensity_score_average  = grid_for_heatmap(z, grid_point_size, probabilities)
 
-
-    Plots.heatmap(X, Y, colormat, color = cs, alpha=0.3, clim = (0,1))
-
-    Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,markershape = :circle, msc = :white, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
-    Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
-
+    if lables == "E"
+        Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.6, clim = (0,1))
+        Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
+        Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
+        plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+    elseif lables == "both"
+        # Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.6, clim = (0,1))
+        # Plots.scatter!(z_sample[1,(y_sample.==0)],z_sample[2,(y_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "y=0")
+        # Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
+        # plt2 = Plots.scatter!(z_sample[1,(y_sample.==1) ],z_sample[2,(y_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "y=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+        Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
+        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 0))],z_sample[2,((E_sample.==0) .& (y_sample .== 0))],  markerstrokewidth = 1,markershape = :cross, markersize = 3,color = colorant"#1D4A91" , label = "E=0, y=0")
+        Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
+        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 1))],z_sample[2,((E_sample.==0) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "E=0, y=1")
+        Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
+        Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 0))],z_sample[2,((E_sample.==1) .& (y_sample .== 0))],  markerstrokewidth = 1, markershape = :cross, markersize = 3,color = colorant"#AE232F", label = "E=1, y=0")
+        Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
+        plt2 = Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 1))],z_sample[2,((E_sample.==1) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label = "E=1, y=1",  xlims = (minimum(X),maximum(X)), ylims = (minimum(X),maximum(X)),  fontsize = 10, legendfontsize=8, font= "Helvetica", title = title,  legend = legend_flag)  
+ 
+    
+    end
+    
 
     
 
@@ -524,13 +540,16 @@ function latent_propensity_ovrlay_no_outcome(z, probabilities, sample_size, E, y
 
     # cs = cgrad([colorant"#77a0d5", colorant"white",  colorant"#96295c"])
     cs = cgrad([colorant"#1D4A91", colorant"white",  colorant"#AE232F"])
+    # cs = cgrad(:seismic)
     X, Y, colormat, propensity_score_average = grid_for_heatmap(z, grid_point_size, probabilities)
 
+   
     Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
     Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
     plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
-    
+ 
+     
 
     return plt2
 end
@@ -545,6 +564,7 @@ function latent_propensity_ovrlay_region(z, probabilities, sample_size, REGION, 
     #AE232F
 
     cs = cgrad([colorant"#1D4A91", colorant"white",  colorant"#AE232F"])
+    # cs = cgrad(:seismic)
 
     X, Y, colormat, propensity_score_average = grid_for_heatmap(z, grid_point_size, probabilities)
     blur = imfilter(colormat, Kernel.gaussian(0.5))
@@ -583,7 +603,9 @@ function latent_propensity_ovrlay_death(z, probabilities, sample_size, label, ti
 
     #AE232F
 
-    cs = cgrad([colorant"#1D4A91", colorant"white",  colorant"#AE232F"])
+    # cs = cgrad([colorant"#1D4A91", colorant"white",  colorant"#AE232F"])
+
+    cs = cgrad(:seismic)
 
     X, Y, colormat, propensity_score_average = grid_for_heatmap(z, grid_point_size, probabilities)
 
