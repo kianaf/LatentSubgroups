@@ -15,8 +15,16 @@ end
 function quantile_transform(transformer::QuantileTransformer, data::Vector{Float64})
     n = length(data)
     transformed_data = similar(data)
+
+    lower_bound = minimum(transformer.quantiles)
+    upper_bound = maximum(transformer.quantiles)
+
     for i in 1:n
-        rank = searchsortedfirst(transformer.quantiles, data[i]) - 1
+
+        # Clip data within the bounds of the quantiles
+        clipped_value = max(lower_bound, min(data[i], upper_bound))
+
+        rank = searchsortedfirst(transformer.quantiles, clipped_value) - 1
         rank = max(1, min(rank, transformer.n_quantiles))  # Ensure rank is within bounds
         uniform_value = rank / transformer.n_quantiles
         transformed_data[i] = Distributions.quantile(Normal(), uniform_value)

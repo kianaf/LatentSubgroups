@@ -712,3 +712,65 @@ function preprocess!(args::Args, preprocess_ps::preprocess_params, x, dataTypeAr
 
     return data, preprocess_ps
 end
+
+
+
+function preprocess_test_data(args::Args, preprocess_ps::preprocess_params, x, dataTypeArray)
+
+    if args.pre_transformation && sum(dataTypeArray) > 0
+
+        if preprocess_ps.pre_transformation_type == "power"
+            Random.seed!(args.seed)
+
+            ####################### ‌Box-Cox transformation ###########################
+
+            x_tr_BC = BC_transform_all_dimensions(x, preprocess_ps.λ2, preprocess_ps.λ1, dataTypeArray)
+
+            ####################### Power transformation #############################
+
+            x_tr_power = power_tr_all_dimensions(x_tr_BC, preprocess_ps.shift, preprocess_ps.peak_rng, preprocess_ps.power, dataTypeArray, preprocess_ps.peak2 .!= preprocess_ps.peak1 )
+
+            data = x_tr_power
+        elseif preprocess_ps.pre_transformation_type == "quantile"
+            data = fill(0.0, size(x,1), size(x,2))
+            
+            for col = 1:size(x, 2)
+                if dataTypeArray[col]
+                    data[:, col] = quantile_transform(preprocess_ps.qt_array[col], x[:, col])  # Transform the data to follow a normal distribution
+                else
+                    data[:, col] = x[:, col]
+                end
+            end
+
+        end
+
+    else
+        if sum(dataTypeArray) == 0
+            println("All the variables are binary! No pre-transformation can be performed.")
+        end
+
+        data = x
+    end
+        
+
+
+    if args.scaling
+
+        data = standardize(preprocess_ps.μ, preprocess_ps.σ, data)
+        
+    else
+        data = data'
+    end
+    
+    if args.pre_transformation && sum(dataTypeArray) > 0
+        if preprocess_ps.pre_transformation_type == "power"
+            save_preprocess_results(data', x_tr_BC, x_tr_power, [], [], args.scaling, preprocess_ps, dataTypeArray, []; val_flag =  true)
+        else
+            save_preprocess_results(data', preprocess_ps, dataTypeArray; val_flag =  true)
+        end
+    elseif args.scaling
+        save_preprocess_results(data', preprocess_ps, dataTypeArray; val_flag =  true)
+    end
+
+    return data, preprocess_ps
+end

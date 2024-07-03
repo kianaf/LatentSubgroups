@@ -1,6 +1,7 @@
 using CSV
 using DataFrames
 using Revise
+using Random
 
 
 includet("structs.jl")
@@ -268,4 +269,54 @@ function generate_toy_example()
     x2 = initialize_bimodal(p,n)
     x = hcat(x1[:,1], x2[:,1])
     return x
+end
+
+# Function to split a matrix into n smaller matrices by rows
+function split_matrix_randomly_by_rows(mat::AbstractMatrix, n::Int)
+    # Determine the size of the original matrix
+    rows, cols = size(mat)  
+    
+    # Calculate the number of rows in each smaller matrix
+    subrows = Int(ceil(rows/n))
+    
+    # Ensure the matrix can be split evenly by rows
+    # if rows % n != 0
+    #     println("Number of rows in the matrix must be divisible by number of folds")
+    # end
+    
+    # Shuffle the rows of the matrix
+    shuffled_indices = shuffle(1:rows)
+    shuffled_mat = mat[shuffled_indices, :]
+    
+    # Initialize an array to hold the smaller matrices
+    submatrices = []
+    
+    # Loop through and create each submatrix
+    for i in 0:n-1
+        if i == n-1
+            submat = shuffled_mat[(i*subrows+1):end, :]
+        else
+            submat = shuffled_mat[(i*subrows+1):(i+1)*subrows, :]
+        end
+        push!(submatrices, submat)
+    end
+    
+    return submatrices
+end
+
+
+
+# Function to create training and validation sets for cross-validation
+function create_cross_validation_sets(mat::AbstractMatrix, n::Int)
+    submatrices = split_matrix_randomly_by_rows(mat, n)
+    cross_val_sets = []
+    
+    for i in 1:n
+        val_set = submatrices[i]
+        train_set = vcat(submatrices[1:i-1]..., submatrices[i+1:end]...)
+        
+        push!(cross_val_sets, (train_set, val_set))
+    end
+    
+    return cross_val_sets
 end

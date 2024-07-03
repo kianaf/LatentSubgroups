@@ -14,7 +14,7 @@ function random_batch_index(x::AbstractArray, batch_size=1; dims=1)
 end
 
 
-function train_GAN!(gan::GAN, x_st, original_data)
+function train_GAN!(gan::GAN, x_st, original_data, preprocess_ps)
     loss_array_gan = [Float64[],Float64[]]
     gen_error = []
     for epoch = 1:gan.epochs
@@ -92,7 +92,7 @@ function train_GAN!(gan::GAN, x_st, original_data)
     return gan, loss_array_gan, gen_error
 end
 
-function GAN_output(input, gan::GAN, args::Args, preprocess_ps::preprocess_params, loss_array_gan:: Array, gen_error::Array)
+function GAN_output(input, gan::GAN, args::Args, preprocess_ps::preprocess_params)
 
     Random.seed!(11)
 

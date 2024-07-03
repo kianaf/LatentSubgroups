@@ -19,10 +19,22 @@ function utility(run_path, x = nothing, syn = nothing)
     elseif isnothing(x) && isnothing(syn)
         x = Matrix(CSV.read(string(run_path, "/original_data.csv"), DataFrame))
         n = size(x,1)
-        syn = Matrix(CSV.read(string(run_path, "/vae/prior_sampling/synthetic_data_prior.csv"), DataFrame))
+        if contains(run_path, ".csv")
+            if contains(run_path, "Norta")
+                syn = Matrix(CSV.read(run_path, DataFrame, header = true))[:,2:end]
+            else 
+                syn = Matrix(CSV.read(run_path, DataFrame, header = true))
+            end
+        else
+            syn = Matrix(CSV.read(string(run_path, "/vae/prior_sampling/synthetic_data_prior.csv"), DataFrame))
+        end
         comb = vcat(syn, x)
     elseif isnothing(x) && !isnothing(syn)
-        x = Matrix(CSV.read(string(run_path, "/original_data.csv"), DataFrame))
+        if contains(run_path, ".csv")
+            x = Matrix(CSV.read(run_path, DataFrame, header = true))[:,2:end]
+        else
+            x = Matrix(CSV.read(string(run_path, "/original_data.csv"), DataFrame))
+        end
         n = size(x,1)
         comb = vcat(syn, x)
     else
@@ -36,14 +48,14 @@ function utility(run_path, x = nothing, syn = nothing)
     model = DecisionTreeClassifier(max_depth=15, min_samples_leaf = 20)  # maximum depth should be tuned using cv
 
     DecisionTree.fit!(model, comb, labelT[:,1])
-    println(model)
+    # println(model)
     
     P = [predict_proba(model, comb[i,:]) for i=1:n+n]
 
     pMSE = (1/(n + n)) * sum([((P[i][2].- (n/(n+n))).^2) for i=1:n+n])
     # Up = (1/(n + n)) * sum([(abs(P[i][2].- (n/(n+n)))) for i=1:n+n])
     
-    println("pMSE: ", pMSE)
+    
     
     numberOfPer = 100
     pMSE_per = fill(0.0, numberOfPer)
@@ -64,11 +76,35 @@ function utility(run_path, x = nothing, syn = nothing)
     
     pMSE_ratio = pMSE / pMSE_per_mean
     Standardize_pMSE = (pMSE - pMSE_per_mean)/pMSE_per_std
+    
+    # println("pMSE: ", pMSE)
+    # println("pMSE_ratio: " ,pMSE_ratio)
+    # println("Standardize_pMSE: ", Standardize_pMSE)
 
-    println("pMSE_ratio: " ,pMSE_ratio)
-    println("Standardize_pMSE: ", Standardize_pMSE)
+    return pMSE, pMSE_ratio, Standardize_pMSE
 end
 
+
+
+
+function calculate_utility_measurement_mean_std(utility_measurement_array)
+
+    pMSE_mean = mean(map(x->x[1], utility_measurement_array))
+    pMSE_std = std(map(x->x[1], utility_measurement_array))
+
+    pMSE_ratio_mean = mean(map(x->x[2], utility_measurement_array))
+    pMSE_ratio_std = std(map(x->x[2], utility_measurement_array))
+
+    Standardize_pMSE_mean = mean(map(x->x[3], utility_measurement_array))
+    Standardize_pMSE_std = std(map(x->x[3], utility_measurement_array))
+
+    println()
+    println("pMSE: ", round(pMSE_mean, digits = 3), " ± ", round(pMSE_std, digits = 3))
+    println("pMSE_ratio: ", round(pMSE_ratio_mean, digits = 3), " ± ", round(pMSE_ratio_std, digits = 3))
+    println("Standardize_pMSE: ", round(Standardize_pMSE_mean, digits = 3), " ± ", round(Standardize_pMSE_std, digits = 3))
+
+    return pMSE_mean, pMSE_std, pMSE_ratio_mean, pMSE_ratio_std, Standardize_pMSE_mean, Standardize_pMSE_std
+end
 ####################################### Logistic Regression ############################################
 
 function logistic_regression(run_path, x = nothing, syn = nothing)

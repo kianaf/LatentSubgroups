@@ -57,7 +57,7 @@ function init_multimodal_vae(args::Args, feature_type)
 
         if length(dir_list) > 0
             for i = 1:length(dir_list)
-                if isdir(string(parent_dir, "/",  dir_list[i]))   && (dir_list[i]!="vae") && (dir_list[i]!="pre_transformation")                    # checking, if it's directory
+                if isdir(string(parent_dir, "/",  dir_list[i]))   && contains(dir_list[i], "vae_")                     # checking, if it's directory
                     append!(vae_list, parse(Int, string(dir_list[i])[5:end]))      # print the name of a directory
                 end
             end
@@ -265,7 +265,7 @@ function loss(X, m::multimodal_vae, preprocess_ps)
 
     reconstruction_loss = - log_likelihood
 
-    return loss_value, reconstruction_loss, kld_loss
+    return loss_value, reconstruction_loss/len, kld_loss/len
 end
 
 
@@ -325,7 +325,7 @@ function loss(X, m::vanilla_vae, preprocess_ps)
     return loss_value, reconstruction_loss, kld_loss
 end
 
-function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_ps, args)
+function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_ps, args; val_data = nothing)
 
     Random.seed!(args.seed)
 
@@ -347,6 +347,11 @@ function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_p
     loss_array_reconstruction = [] 
     loss_array_kld = []
 
+    if args.cross_validation_flag
+        loss_array_vae_val = []
+        loss_array_reconstruction_val = [] 
+        loss_array_kld_val = []
+    end
 
     training_data = get_data(preprocessed_data, args.batch_size)
 
@@ -368,6 +373,7 @@ function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_p
         end
 
         loss_mean, reconstruction_loss_mean, kld_loss_mean = average_loss!(training_data, m, loss_array_vae, loss_array_reconstruction, loss_array_kld, preprocess_ps)
+        loss_mean_val, reconstruction_loss_mean_val, kld_loss_mean_val = average_loss!(val_data, m, loss_array_vae_val, loss_array_reconstruction_val, loss_array_kld_val, preprocess_ps)
 
         if i % args.verbose_freq == 0
             println(loss_mean)
@@ -377,9 +383,17 @@ function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_p
             !ispath(args.save_path) && mkpath(args.save_path)
     
             with_logger(m.tblogger_object) do
-                @info "VAE_loss" loss_mean
-                @info "VAE_reconstruction_loss" reconstruction_loss_mean log_step_increment=0
-                @info "VAE_kld_loss" kld_loss_mean log_step_increment=0
+
+
+                if args.cross_validation_flag
+                    @info "VAE_loss_val" train_and_val = (train=loss_mean,  val=loss_mean_val) 
+                    @info "VAE_reconstruction_loss_val" train_and_val = (train=reconstruction_loss_mean, val=reconstruction_loss_mean_val) log_step_increment=0
+                    @info "VAE_kld_loss_val" train_and_val = (train=kld_loss_mean, val=kld_loss_mean_val) log_step_increment=0
+                else
+                    @info "VAE_loss" loss_mean
+                    @info "VAE_reconstruction_loss" reconstruction_loss_mean log_step_increment=0
+                    @info "VAE_kld_loss" kld_loss_mean log_step_increment=0
+                end
             end
         end
 
@@ -387,7 +401,11 @@ function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_p
     
     save_vae_results(training_data, preprocessed_data, original_data, m, preprocess_ps, args, loss_array_vae)
 
-    return m, training_data, loss_array_vae
+    if args.cross_validation_flag
+        return m, training_data, (loss_array_reconstruction, loss_array_reconstruction_val)
+    else
+        return m, training_data, loss_array_vae
+    end
 end
 
 
@@ -483,7 +501,7 @@ function get_latent(input, m::vanilla_vae, args::Args, preprocess_ps::preprocess
 end
 
 
-function VAE_output(input, m::vanilla_vae, args::Args, preprocess_ps::preprocess_params, sampling_method::String)
+function VAE_output(input, m::vanilla_vae, args::Args, preprocess_ps::preprocess_params, sampling_method::String, split_post_fix ="")
 
     Random.seed!(args.seed)
 
@@ -560,11 +578,11 @@ function VAE_output(input, m::vanilla_vae, args::Args, preprocess_ps::preprocess
     
 
     if sampling_method == "posterior"
-        mkdir(string(logdir(m.tblogger_object), "/posterior_sampling"))
-        writedlm(string(logdir(m.tblogger_object), "/posterior_sampling/VAE_output.csv"),  output, ',')
+        mkdir(string(logdir(m.tblogger_object), "/posterior_sampling$(split_post_fix)"))
+        writedlm(string(logdir(m.tblogger_object), "/posterior_sampling$(split_post_fix)/VAE_output.csv"),  output, ',')
     else
-        mkdir(string(logdir(m.tblogger_object), "/prior_sampling"))
-        writedlm(string(logdir(m.tblogger_object), "/prior_sampling/VAE_output.csv"),  output, ',')
+        mkdir(string(logdir(m.tblogger_object), "/prior_sampling$(split_post_fix)"))
+        writedlm(string(logdir(m.tblogger_object), "/prior_sampling$(split_post_fix)/VAE_output.csv"),  output, ',')
     end
 
     if args.scaling
@@ -619,7 +637,7 @@ function get_latent(input, m::multimodal_vae, args::Args, preprocess_ps::preproc
 
     return latvals
 end
-function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preprocess_params, sampling_method::String)
+function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preprocess_params, sampling_method::String, split_post_fix = "")
 
     Random.seed!(args.seed)
 
@@ -704,11 +722,11 @@ function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preproc
     end
 
     if sampling_method == "posterior"
-        mkdir(string(logdir(m.tblogger_object), "/posterior_sampling"))
-        writedlm(string(logdir(m.tblogger_object), "/posterior_sampling/VAE_output.csv"),  output, ',')
+        mkdir(string(logdir(m.tblogger_object), "/posterior_sampling$(split_post_fix)"))
+        writedlm(string(logdir(m.tblogger_object), "/posterior_sampling$(split_post_fix)/VAE_output.csv"),  output, ',')
     else
-        mkdir(string(logdir(m.tblogger_object), "/prior_sampling"))
-        writedlm(string(logdir(m.tblogger_object), "/prior_sampling/VAE_output.csv"),  output, ',')
+        mkdir(string(logdir(m.tblogger_object), "/prior_sampling$(split_post_fix)"))
+        writedlm(string(logdir(m.tblogger_object), "/prior_sampling$(split_post_fix)/VAE_output.csv"),  output, ',')
     end
 
     if args.scaling

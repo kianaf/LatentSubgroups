@@ -72,13 +72,8 @@ if (!require("lme4")) {
 ## options("mc.cores") <- 3 ## set up your global 'mclapply()' forking options other than default (2 cores). Beware: changing default options might not reproduce results as shown in paper.
 
 
-# loading the data
-# url2 <- "./data/simulation.csv"
-# url2 <- "./data/ist.csv"
-
-setwd("/Users/farhadyar/Documents")
-url2 <- "Project_PTVAE/progs/github_repo/PTVAE/data/simulation.csv"
-x_simulation <- read.csv(url2 , header = TRUE)  
+url2 <- paste0(getwd(), "/data/simulation.csv")
+x_simulation <- read.csv(url2 , header = TRUE)
 
 #######################  COMMENT (Bono): current example runs in approx 3 minutes but ...
 options(mc.cores = 8L)  ## .. change accordingly to your Nr of cores (> 3) minus one, to speed up calculations  
@@ -143,4 +138,4 @@ syn_fed <- syn[[1]]
 
 
 
-write.csv(syn_fed, "Project_PTVAE/progs/github_repo/PTVAE/Norta-J/202311_sim_method4.csv")
+write.csv(syn_fed, paste0(getwd(), "/Norta-J/202311_sim_method4.csv"))

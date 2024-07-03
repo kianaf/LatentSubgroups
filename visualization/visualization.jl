@@ -292,7 +292,7 @@ function contour(x, syn, fed, dim1, dim2)
     Y = f.y
     Z = f.density # Note x-y "for" ordering
 
-    plt_x = Plots.contourf(X, Y, Z, color=:viridis, title = "Original Data" )#, ylabel="dimension$(dim1)", xlabel="dimension$(dim2)", fontsize = 10)
+    plt_x = Plots.contourf(X, Y, Z, color=:viridis, title = "Original Data" )
 
 
     Random.seed!(42)
@@ -301,7 +301,7 @@ function contour(x, syn, fed, dim1, dim2)
     Y = f.y
     Z = f.density # Note x-y "for" ordering
 
-    plt_syn = Plots.contourf(X, Y, Z, color=:viridis, title = "PTVAE")#, ylabel="dimension$(dim1)", xlabel="dimension$(dim2)", fontsize = 10)
+    plt_syn = Plots.contourf(X, Y, Z, color=:viridis, title = "PTVAE")
 
 
 
@@ -311,7 +311,7 @@ function contour(x, syn, fed, dim1, dim2)
     Y = f.y
     Z = f.density # Note x-y "for" ordering
 
-    plt_fed = Plots.contourf(X, Y, Z, color=:viridis, title = "Norta-j")#, ylabel="dimension$(dim1)", xlabel="dimension$(dim2)", fontsize = 10)
+    plt_fed = Plots.contourf(X, Y, Z, color=:viridis, title = "Norta-j")
 
 
     plot_list = [plt_x, plt_syn, plt_fed]
@@ -503,15 +503,12 @@ function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, le
     X, Y, colormat, propensity_score_average  = grid_for_heatmap(z, grid_point_size, probabilities)
 
     if lables == "E"
-        Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.6, clim = (0,1))
+        Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
         Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
         plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
     elseif lables == "both"
-        # Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.6, clim = (0,1))
-        # Plots.scatter!(z_sample[1,(y_sample.==0)],z_sample[2,(y_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "y=0")
-        # Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        # plt2 = Plots.scatter!(z_sample[1,(y_sample.==1) ],z_sample[2,(y_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "y=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+
         Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
         Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 0))],z_sample[2,((E_sample.==0) .& (y_sample .== 0))],  markerstrokewidth = 1,markershape = :cross, markersize = 3,color = colorant"#1D4A91" , label = "E=0, y=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
@@ -519,7 +516,7 @@ function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, le
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
         Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 0))],z_sample[2,((E_sample.==1) .& (y_sample .== 0))],  markerstrokewidth = 1, markershape = :cross, markersize = 3,color = colorant"#AE232F", label = "E=1, y=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        plt2 = Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 1))],z_sample[2,((E_sample.==1) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label = "E=1, y=1",  xlims = (minimum(X),maximum(X)), ylims = (minimum(X),maximum(X)),  fontsize = 10, legendfontsize=8, font= "Helvetica", title = title,  legend = legend_flag)  
+        plt2 = Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 1))],z_sample[2,((E_sample.==1) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label = "E=1, y=1",  xlims = (minimum(z_sample[1,:]),maximum(z_sample[1,:])), ylims = (minimum(z_sample[2,:]),maximum(z_sample[2,:])),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title,  legend = legend_flag)  
  
     
     end
@@ -614,7 +611,7 @@ function latent_propensity_ovrlay_death(z, probabilities, sample_size, label, ti
     Plots.heatmap(X, Y, colormat, color = cs, alpha=0.3)
     Plots.scatter!(z_sample[1,(label_sample.==0)],z_sample[2,(label_sample.==0)],  markerstrokewidth = 0,markershape = :circle, markersize = 2,color = colorant"#1D4A91" , label = "FDEAD = 0")
     Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-    plt1 = Plots.scatter!(z_sample[1,(label_sample.==1)],z_sample[2,(label_sample.==1)], markerstrokewidth = 0, markershape = :circle, markersize = 2, color = colorant"#AE232F", label =  "FDEAD = 1",  xlims = (minimum(X) - grid_point_size, maximum(X)+ grid_point_size), ylims = (minimum(Y) - grid_point_size, maximum(Y)+ grid_point_size), ylabel="Z2", xlabel="Z1", fontsize = 10, legendfontsize=8, font= "Helvetica", title =title)
+    plt1 = Plots.scatter!(z_sample[1,(label_sample.==1)],z_sample[2,(label_sample.==1)], markerstrokewidth = 0, markershape = :circle, markersize = 2, color = colorant"#AE232F", label =  "FDEAD = 1",  xlims = (minimum(X) - grid_point_size, maximum(X)+ grid_point_size), ylims = (minimum(Y) - grid_point_size, maximum(Y)+ grid_point_size), ylabel="Z2", xlabel="Z1", fontsize = 8, legendfontsize=8, font= "Helvetica", title =title)
 
     
 end
@@ -731,4 +728,59 @@ function rectangle_from_coords(xb, yb, xt, yt)
         xb  yb
         NaN NaN
     ]
+end
+
+
+
+function cross_val_reconstruction_plot(reconstruction_train_val_sets)
+
+    # Set default DPI to 300
+    default(dpi=300)
+
+    fold_colors = palette(:tab10)
+    plt = Plots.plot( font="Helvetica")
+
+    epochs = 1:length(reconstruction_train_val_sets[1][1])
+
+    for i = 1:length(reconstruction_train_val_sets)
+        
+        Plots.plot!(epochs, reconstruction_train_val_sets[i][1], label="Train Fold_$i", color = fold_colors[i], lw = 2)
+        Plots.plot!(epochs,reconstruction_train_val_sets[i][2], label="Validation Fold_$i", linestyle=:dash, color = fold_colors[i], lw = 2)
+    end
+
+    Plots.xlabel!("Epochs")
+    Plots.ylabel!("Reconstruction Error")
+    Plots.title!("Reconstruction Error for Each Fold")
+
+    return plt
+end
+
+
+
+function cross_val_reconstruction_plot_mean_shade(reconstruction_train_val_set)
+    # Set default DPI to 300
+    default(dpi=300)
+    
+    plt = Plots.plot(font="Helvetica")
+
+    epochs = 1:length(reconstruction_train_val_sets[1][1])
+
+
+    train_mean = mean.([map(x->x[1], reconstruction_train_val_set)])[1]
+    train_std= 3 .* std.([map(x->x[1], reconstruction_train_val_set)])[1]
+
+    val_mean = mean.([map(x->x[2], reconstruction_train_val_set)])[1]
+    val_std = 3 .* std.([map(x->x[2], reconstruction_train_val_set)])[1]
+
+
+    Plots.plot!(epochs, train_mean, ribbon = train_std, label="Train mean ± 3std", color = "#1D4A91", lw = 3, fillalpha = 0.5)
+    Plots.plot!(epochs, val_mean, ribbon = val_std ,  label="Validation mean ± 3std", linestyle=:dash, color = "#AE232F", lw = 3, fillalpha = 0.5, size= (1000, 1000))
+
+
+    Plots.xlabel!("Epochs")
+    Plots.ylabel!("Reconstruction error")
+    Plots.title!("Reconstruction error for 10-fold cross validation")
+
+    return plt
+
 end

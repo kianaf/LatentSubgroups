@@ -76,8 +76,7 @@ if (!require("lme4")) {
 # url2 <- "./data/simulation.csv"
 # url2 <- "./data/ist.csv"
 
-setwd("/Users/farhadyar/Documents")
-url2 <- "Project_PTVAE/progs/github_repo/PTVAE/data/ist_randomization_data_smaller_no_west_no_south_aug5.csv"
+url2 <- paste0(getwd(), "/data/ist_randomization_data_smaller_no_west_no_south_aug5.csv")
 x_simulation <-as.data.frame(read.csv(url2 , header = TRUE))[, 1:15] 
 
    #######################  COMMENT (Bono): current example runs in approx 3 minutes but ...
@@ -115,18 +114,18 @@ set.seed( 65553, "L'Ecuyer")
 system.time(
   
   pseudodata <- DataRebuild(
-    H = 100,
-    n= stats$sample.size,
-    correlation.matrix =  stats$correlation.matrix,
-    moments = stats$first.four.moments,
-    x.mode = stats$is.binary.variable,
-    corrtype = "rank.corr",
-    marg.model = "johnson", #"gamma",  # or johnson
-    variable.names = stats$variable.names, 
-    checkdata = TRUE,
-    tabulate.similar.data = TRUE
-  )
-  
+      H = 1,
+      n= stats$sample.size,
+      correlation.matrix =  stats$correlation.matrix,
+      moments = stats$first.four.moments,
+      x.mode = stats$is.binary.variable,
+      corrtype = "rank.corr",
+      marg.model = "johnson", #"gamma",  # or johnson
+      variable.names = stats$variable.names, 
+      checkdata = TRUE,
+      tabulate.similar.data = TRUE, 
+      rescale.smoothed.binary = TRUE
+    )
 )
 
 
@@ -142,4 +141,4 @@ syn_fed <- syn[[1]]
 # }
 
 
-write.csv(syn_fed, "Project_PTVAE/progs/github_repo/PTVAE/Norta-J/202311_IST_two_regions_method4.csv")
+write.csv(syn_fed, paste0(getwd(), "/Norta-J/202311_IST_two_regions_method4.csv"))

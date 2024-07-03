@@ -36,3 +36,6 @@ PTVAE.Rproj
 
 
 runs/*
+GAN/runs/*
+Norta-J/run_ist_cross_validation/*
+Norta-J/run_sim_cross_validation/*
