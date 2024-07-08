@@ -99,9 +99,9 @@ function calculate_utility_measurement_mean_std(utility_measurement_array)
     Standardize_pMSE_std = std(map(x->x[3], utility_measurement_array))
 
     println()
-    println("pMSE: ", round(pMSE_mean, digits = 3), " ± ", round(pMSE_std, digits = 3))
-    println("pMSE_ratio: ", round(pMSE_ratio_mean, digits = 3), " ± ", round(pMSE_ratio_std, digits = 3))
-    println("Standardize_pMSE: ", round(Standardize_pMSE_mean, digits = 3), " ± ", round(Standardize_pMSE_std, digits = 3))
+    println("pMSE: ", round(pMSE_mean, digits = 3), " ± ", round(pMSE_std, digits = 2))
+    println("pMSE_ratio: ", round(pMSE_ratio_mean, digits = 3), " ± ", round(pMSE_ratio_std, digits = 2))
+    println("Standardize_pMSE: ", round(Standardize_pMSE_mean, digits = 3), " ± ", round(Standardize_pMSE_std, digits = 2))
 
     return pMSE_mean, pMSE_std, pMSE_ratio_mean, pMSE_ratio_std, Standardize_pMSE_mean, Standardize_pMSE_std
 end

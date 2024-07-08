@@ -135,7 +135,7 @@ function fit_logistic_regression_selected_features_both(preprocessed_data, selec
         end
     end
     
-
+   
     fm = @eval(@formula($(Meta.parse(formula_str))))
     selected_model = glm(fm, df, Binomial(), LogitLink())
 

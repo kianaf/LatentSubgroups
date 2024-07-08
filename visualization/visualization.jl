@@ -325,9 +325,9 @@ end
 
 function scatter_latent(z, colorcode_str, colorcode, title)
 
-    Plots.scatter(z[1,colorcode.==0],z[2,colorcode.==0], markershape = :circle, markersize = 3,markerstrokewidth=0.5,color = colorant"#1D4A91" , markerstrokecolor = :white, label = "$(colorcode_str) = 0", alpha = 0.6 )
+    Plots.scatter(z[1,colorcode.==0],z[2,colorcode.==0], markershape = :circle, markerstrokewidth = 0, markersize = 4, color = colorant"#1D4A91" , markerstrokecolor = :white, label = "$(colorcode_str) = 0")
     Plots.scatter!([0],[0], markershape = :circle, markersize = 1,markerstrokewidth=0,color = :white , label = " " )
-    plt = Plots.scatter!(z[1,colorcode.==1],z[2,colorcode.==1], markershape = :dtriangle, markersize = 4, markerstrokewidth=0.5, color = colorant"#AE232F", markerstrokecolor = :white,label = "$(colorcode_str) = 1", title = title, dpi = 300  )
+    plt = Plots.scatter!(z[1,colorcode.==1],z[2,colorcode.==1], markershape = :dtriangle, markersize = 4, markerstrokewidth=0, color = colorant"#AE232F", markerstrokecolor = :white,label = "$(colorcode_str) = 1", title = title, dpi = 300, size = (700, 700)  )
     
 end
 
@@ -506,17 +506,17 @@ function latent_propensity_ovrlay(z, probabilities, sample_size, E, y, title, le
         Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
         Plots.scatter!(z_sample[1,(E_sample.==0)],z_sample[2,(E_sample.==0) ],  markerstrokewidth = 0,msc = :white, markershape = :circle, markersize = 3,color = colorant"#1D4A91"  , label = "E=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:])+ grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
+        plt2 = Plots.scatter!(z_sample[1,(E_sample.==1) ],z_sample[2,(E_sample.==1) ],  markerstrokewidth = 0, msc = :white, markershape = :dtriangle, markersize = 4,color = colorant"#AE232F", label = "E=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size, maximum(z_sample[1,:]) + grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:])+ grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title, legend = legend_flag)
     elseif lables == "both"
 
         Plots.heatmap(X, Y,  colormat, color = cs, alpha=0.3, clim = (0,1))
-        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 0))],z_sample[2,((E_sample.==0) .& (y_sample .== 0))],  markerstrokewidth = 1,markershape = :cross, markersize = 3,color = colorant"#1D4A91" , label = "E=0, y=0")
+        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 0))],z_sample[2,((E_sample.==0) .& (y_sample .== 0))],  markerstrokewidth = 0, markershape = :dtriangle, markersize = 4,color = colorant"#1D4A91" , label = "E=0, y=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 1))],z_sample[2,((E_sample.==0) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3,color = colorant"#1D4A91" , label = "E=0, y=1")
+        Plots.scatter!(z_sample[1,((E_sample.==0) .& (y_sample .== 1))],z_sample[2,((E_sample.==0) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 4,color = colorant"#1D4A91" , label = "E=0, y=1")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 0))],z_sample[2,((E_sample.==1) .& (y_sample .== 0))],  markerstrokewidth = 1, markershape = :cross, markersize = 3,color = colorant"#AE232F", label = "E=1, y=0")
+        Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 0))],z_sample[2,((E_sample.==1) .& (y_sample .== 0))],  markerstrokewidth = 0, markershape = :dtriangle,markersize = 4,color = colorant"#AE232F", label = "E=1, y=0")
         Plots.scatter!([0],[0], label=" ", ms=0, mc=:white, msc=:white)
-        plt2 = Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 1))],z_sample[2,((E_sample.==1) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 3, color = colorant"#AE232F", label = "E=1, y=1",  xlims = (minimum(z_sample[1,:]),maximum(z_sample[1,:])), ylims = (minimum(z_sample[2,:]),maximum(z_sample[2,:])),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title,  legend = legend_flag)  
+        plt2 = Plots.scatter!(z_sample[1,((E_sample.==1) .& (y_sample .== 1))],z_sample[2,((E_sample.==1) .& (y_sample .== 1))], markerstrokewidth = 0, markershape = :circle, markersize = 4, color = colorant"#AE232F", label = "E=1, y=1",  xlims = (minimum(z_sample[1,:]) - grid_point_size ,maximum(z_sample[1,:]) + grid_point_size), ylims = (minimum(z_sample[2,:]) - grid_point_size, maximum(z_sample[2,:]) + grid_point_size),  fontsize = 8, legendfontsize=8, font= "Helvetica", title = title,  legend = legend_flag, Plots.size(1000,800))  
  
     
     end
@@ -757,7 +757,7 @@ end
 
 
 
-function cross_val_reconstruction_plot_mean_shade(reconstruction_train_val_set)
+function cross_val_reconstruction_plot_mean_shade(reconstruction_train_val_set, title)
     # Set default DPI to 300
     default(dpi=300)
     
@@ -773,13 +773,14 @@ function cross_val_reconstruction_plot_mean_shade(reconstruction_train_val_set)
     val_std = 3 .* std.([map(x->x[2], reconstruction_train_val_set)])[1]
 
 
-    Plots.plot!(epochs, train_mean, ribbon = train_std, label="Train mean ± 3std", color = "#1D4A91", lw = 3, fillalpha = 0.5)
-    Plots.plot!(epochs, val_mean, ribbon = val_std ,  label="Validation mean ± 3std", linestyle=:dash, color = "#AE232F", lw = 3, fillalpha = 0.5, size= (1000, 1000))
+    Plots.plot!(epochs, train_mean, ribbon = train_std, label="Train data mean ± 3std", color = "#1D4A91", linewidth = 3, fillalpha = 0.5)
+    
+    Plots.plot!(epochs, val_mean, ribbon = val_std ,  label="Heldout data mean ± 3std", linestyle= :dash , color = "#AE232F", linewidth = 3, fillalpha = 0.5, size= (1000, 1000), left_margin=10Plots.mm, bottom_margin=10Plots.mm)
 
 
     Plots.xlabel!("Epochs")
     Plots.ylabel!("Reconstruction error")
-    Plots.title!("Reconstruction error for 10-fold cross validation")
+    Plots.title!(title)
 
     return plt
 

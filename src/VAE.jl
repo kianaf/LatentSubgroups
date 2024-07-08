@@ -89,7 +89,7 @@ function init_multimodal_vae(args::Args, feature_type)
     binary_encoder, continuous_encoder, binary_encodedμ, continuous_encodedμ, binary_encodedlogσ, continuous_encodedlogσ = Dense(num_binary_vars, num_binary_vars, tanh), Dense(num_continuous_vars, num_continuous_vars, tanh), Dense(num_binary_vars, args.latent_dim), Dense(num_continuous_vars,  args.latent_dim), Dense(num_binary_vars, args.latent_dim), Dense(num_continuous_vars,  args.latent_dim)
 
     # VAE decoder
-    if args.synthetic_data
+    if args.latent_fusion_method
         decoder, decodedμ, decodedlogσ, decodedπ = Dense(2 * args.latent_dim, args.hidden_dim, tanh),  Dense(args.hidden_dim, num_continuous_vars, σ), Dense(args.hidden_dim, num_continuous_vars), Dense(args.hidden_dim, num_binary_vars, σ)
         
     else
@@ -209,7 +209,7 @@ function loss(X, m::multimodal_vae, preprocess_ps)
     # latent_σ = m.σ_fusion(vcat(binary_logσ, continuous_logσ))
     # latvals = latentz(latent_μ, latent_σ)
 
-    if args.synthetic_data 
+    if args.latent_fusion_method 
         latvals = vcat(latentz(binary_μ, binary_logσ), latentz(continuous_μ, continuous_logσ))
     else
         latvals = latentz((binary_μ .+ continuous_μ) ./ 2, (binary_logσ .+ continuous_logσ)./2)
@@ -251,7 +251,7 @@ function loss(X, m::multimodal_vae, preprocess_ps)
 
         log_likelihood = continuous_weight * logp_x_z(X, latz, m) + binary_weight * logp_x_z_bernouli(X, latz, m)
 
-        if args.synthetic_data
+        if args.latent_fusion_method
             kld_loss = kl_q_p(hcat(binary_μ, continuous_μ), hcat(binary_logσ, continuous_logσ)) #/(2*latent_dim)
         else
             kld_loss = kl_q_p((binary_μ .+ continuous_μ)./2, (binary_logσ .+ continuous_logσ)./2)
@@ -373,8 +373,11 @@ function trainVAE!(preprocessed_data, original_data, dataTypeArray, preprocess_p
         end
 
         loss_mean, reconstruction_loss_mean, kld_loss_mean = average_loss!(training_data, m, loss_array_vae, loss_array_reconstruction, loss_array_kld, preprocess_ps)
-        loss_mean_val, reconstruction_loss_mean_val, kld_loss_mean_val = average_loss!(val_data, m, loss_array_vae_val, loss_array_reconstruction_val, loss_array_kld_val, preprocess_ps)
 
+        if args.cross_validation_flag
+            loss_mean_val, reconstruction_loss_mean_val, kld_loss_mean_val = average_loss!(val_data, m, loss_array_vae_val, loss_array_reconstruction_val, loss_array_kld_val, preprocess_ps)
+
+        end
         if i % args.verbose_freq == 0
             println(loss_mean)
         end
@@ -629,7 +632,7 @@ end
 function get_latent(input, m::multimodal_vae, args::Args, preprocess_ps::preprocess_params)
     (binary_μ, binary_logσ), (continuous_μ, continuous_logσ)  = encode(input, m)
 
-    if args.synthetic_data
+    if args.latent_fusion_method
         latvals = vcat(latentz(binary_μ, binary_logσ), latentz(continuous_μ, continuous_logσ))
     else
         latvals = latentz((binary_μ .+ continuous_μ) ./ 2, (binary_logσ .+ continuous_logσ)./2)
@@ -658,7 +661,7 @@ function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preproc
 
             latvals = weighted_samples
         else
-            if args.synthetic_data
+            if args.latent_fusion_method
                 truesig = fill(0.0, 2 * args.latent_dim, 2 * args.latent_dim)
                 truesig[diagind(truesig)] .= 1.0
                 truemu = fill(0.0, 2 * args.latent_dim)
@@ -679,7 +682,7 @@ function VAE_output(input, m::multimodal_vae, args::Args, preprocess_ps::preproc
         (binary_μ, binary_logσ), (continuous_μ, continuous_logσ)  = encode(data, m)
 
 
-        if args.synthetic_data
+        if args.latent_fusion_method
             latvals = vcat(latentz(binary_μ, binary_logσ), latentz(continuous_μ, continuous_logσ))
         else
             latvals = latentz((binary_μ .+ continuous_μ) ./ 2, (binary_logσ .+ continuous_logσ)./2)

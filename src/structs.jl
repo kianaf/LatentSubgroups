@@ -14,11 +14,11 @@ includet("quantile_transformation.jl")
     input_dim::Int = 9                                   # number of features
 
     pre_transformation_type::String = "power"            # "power" vs "quantile"
-    qt_array::Array{QuantileTransformer} = []               # the array of quantiles per input dimensions
+    qt_array::Array{QuantileTransformer} = []            # the array of quantiles per input dimensions
     n_quantiles::Int = 100
 
-    λ2::Array{Float32} = fill(0.0, input_dim)             # shifting value for box cox transformation
-    λ1::Array{Float32} = fill(1.0, input_dim)             # power value for box cox transformation
+    λ2::Array{Float32} = fill(0.0, input_dim)            # shifting value for box cox transformation
+    λ1::Array{Float32} = fill(1.0, input_dim)            # power value for box cox transformation
     box_cox_epochs::Int = 5000                           # number of epochs for training box cox transformation parameters
     box_cox_η::Float32 = 1e-3                            # learning rate for training box cox power
 
@@ -32,50 +32,51 @@ includet("quantile_transformation.jl")
     min::Array{Float32} = fill(0.0, input_dim)           # minimum value for power transformation
     max::Array{Float32} = fill(0.0, input_dim)           # maximum value for power transformation
     power::Array{Float32} = fill(1.0, input_dim)         # power value for power transformation
-    power_epochs::Int = 50000                             # number of epochs for training power transformation parameters  
+    power_epochs::Int = 50000                            # number of epochs for training power transformation parameters  
     power_η::Float32 = 1e-3                              # learning rate for training power transformation parameters
 end
 
 
 
-#FIXME where to put learning rate and the others? it is VAE related but some are data related the reason I did not seperate is that some are being used as inputs one solution can be hyperparameters and data structs
 @with_kw mutable struct Args
 
-    # data_string::String = "ist_randomization_data_smaller_no_west_no_south_aug5" 
-    data_string::String = "sim"
+    # specify the dataset you want to use "toy", "sim" or "ist" (in case of having your own csv file use the name before .csv) 
+    data_string::String = "ist_randomization_data_smaller_no_west_no_south_aug5" 
+    # data_string::String = "sim"
     # data_string::String = "data_scenario1"
-    #"ist_randomization_data_smaller_POLA_SWED_aug15"   ##"ist_randomization_data_smaller_no_west_no_south_no_treatment_aug8"#"ist_randomization_data_smaller_aug3" #"ist_randomization_data_aug3"# "ist_new" #"ist_more_features_no_west"#"ist_randomization_data_july14"  # "ist2d_subset" #  "ist_more_features_2"#"ist_more_features_2" #"ist_more_features"  #"data_scenario1"#"hnscc_my_version" #"sc_dec_19"                                                   # specify the dataset you want to use "toy", "sim" or "ist" (in case of having your own csv file use the name before .csv) 
+    
     η::Float32 = 1e-4                                                                                                # learning rate for training VAE
     λ::Float32 = 0.01f0
-    β::Float64 = 0.5                                                                                            # regularization paramater
-    batch_size::Int = 128                                                                                             # batch size
-    epochs::Int = 1000                                                                                                 # number of epochs for training VAE
+    β::Float64 = 0.5                                                                                                 # regularization paramater
+    batch_size::Int = 128                                                                                            # batch size
+    epochs::Int = 1000                                                                                               # number of epochs for training VAE
     seed::Int = 42                                                                                                   # random seed
     input_dim::Int = 9                                                                                               # number of features
-    latent_dim::Int = 2                                                                                               # latent dimension
+    latent_dim::Int = 2                                                                                              # latent dimension
     hidden_dim::Int = 9                                                                                              # hidden dimension
-    verbose_freq::Int = 100                                                                                           # logging for every verbose_freq iterations #FIXME
+    verbose_freq::Int = 100                                                                                          # logging for every verbose_freq iterations #FIXME
 
     tblogger_flag::Bool = true 
     save_path::String = "runs"                                                                                       # results path
-    current_run_path::String = ""                                                # path with the run number assigned to this run
+    current_run_path::String = ""                                                                                    # path with the run number assigned to this run
     
     hyperopt_flag::Bool = false                                                                                      # True if we do hyper parameter optimization False if we read from args                                                                            
-    tblogger_object::Union{TBLogger, Nothing} = nothing                   # TBLogger object
+    tblogger_object::Union{TBLogger, Nothing} = nothing                                                              # TBLogger object
 
     pre_transformation::Bool =  true                                                                                 # PTVAE (pre_transformation = true) or Standard VAE
     bimodality_score_threshold::Float32 = 0                                                                          # When zero, bimodality_flag becomes always true.
     
-    scaling::Bool = true                                                                                              # true when scaling is requested
+    scaling::Bool = true                                                                                             # true when scaling is requested
     scaling_method::String = "standardization" # or "standardization"  # or "scaling"
                                                                                     
     AIQN::Bool = false                                                                                               # true if autoregressive implicit quantile networks method is used for training VAE
-    multimodal_encoder::Bool = true                                                                                 # true if we train different encoders for different modalities in the VAE                                                                                           
+    multimodal_encoder::Bool = true                                                                                  # true if we train different encoders for different modalities in the VAE                                                                                           
 
-    synthetic_data::Bool = false                                                                                     # if true, we generate synthetic data and if false we are interested in latent structure (2 dimensional)
+    latent_fusion_method::Bool = false                                                                               # if true, we average values in the latent space and we are interested in latent structure (2 dimensional) and if false we concatenate the latent of different encoders.
+                                                                                                                     # this flag has been named synthetic_data before which is not a good name for this flag.
     
-    IPW_sampling::Bool = false                                                                                        # if true, we use IPW sampling for VAE
-    subpopulation_mode::Int = 2                                                                                         # 0 which is class 0 and 1 which is class 1 and 2 which is both individuals common to both                                                           
+    IPW_sampling::Bool = false                                                                                       # if true, we use IPW sampling for VAE
+    subpopulation_mode::Int = 2                                                                                      # 0 which is class 0 and 1 which is class 1 and 2 which is both individuals common to both                                                           
     grid_point_size::Float32 = 0.2
     δ::Float32 = 0.1
     
@@ -100,8 +101,8 @@ mutable struct vanilla_vae
     num_continuous_vars
     num_binary_vars
     AIQN
-    β     # multiplier for the KL divergence 
-    tblogger_object                   # TBLogger object
+    β               # multiplier for the KL divergence 
+    tblogger_object # TBLogger object
 end
 
 mutable struct multimodal_vae
@@ -119,7 +120,7 @@ mutable struct multimodal_vae
     num_continuous_vars
     num_binary_vars
     AIQN
-    β     # multiplier for the KL divergence 
+    β               # multiplier for the KL divergence 
     tblogger_object
 end
 
@@ -177,9 +178,6 @@ function save_model(model, path)
     @save path model
 end
 
-
-#FIXME:
-# UndefVarError: TensorBoardLogger not defined
 
 function load_model(path)
     @load path model
