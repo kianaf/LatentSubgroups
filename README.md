@@ -313,11 +313,11 @@ All dependencies are specified in `Project.toml`. Key packages include:
 If you use this code in your research, please cite:
 
 ```bibtex
-@article{latentsubgroups2023,
-  title={Combining propensity score methods with variational autoencoders for generating synthetic data in presence of latent sub-groups},
-  author={[Author Names]},
-  journal={[Journal Name]},
-  year={2023}
+@article{farhadyar_combining_2024,
+	title = {Combining propensity score methods with variational autoencoders for generating synthetic data in presence of latent sub-groups},
+	journal = {BMC Medical Research Methodology},
+	author = {Farhadyar, Kiana and Bonofiglio, Federico and Hackenberg, Maren and Behrens, Max and Zöller, Daniela and Binder, Harald},
+	year = {2024},
 }
 ```
 
